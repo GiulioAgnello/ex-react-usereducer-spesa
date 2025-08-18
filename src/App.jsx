@@ -20,6 +20,15 @@ function App() {
       }
     });
   }
+
+  const removeForomCart = (product) => {
+    setAddedProducts((curr) => curr.filter((p) => p.name !== product.name));
+  };
+
+  const totalToPay = addedProducts.reduce(
+    (acc, p) => acc + p.price * p.quantity,
+    0
+  );
   return (
     <>
       <h1>Ex Reducer</h1>
@@ -44,9 +53,13 @@ function App() {
               <p>{product.name}</p>
               <p>prezzo: {product.price}</p>
               <strong>Quantità: {product.quantity}</strong>
+              <button onClick={() => removeForomCart(product)}>
+                Rimuovi dal carrello
+              </button>
             </li>
           ))}
         </ul>
+        <h3>Totale Da Pagare: {totalToPay.toFixed(2)} €</h3>
       </div>
     </>
   );
