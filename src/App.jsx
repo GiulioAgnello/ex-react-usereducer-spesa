@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import ListComponent from "./assets/ListComponent";
 const products = [
   { name: "Mela", price: 0.5 },
@@ -6,24 +6,39 @@ const products = [
   { name: "Latte", price: 1.0 },
   { name: "Pasta", price: 0.7 },
 ];
-function App() {
-  const [addedProducts, setAddedProducts] = useState([]);
-  function addToCart(product) {
-    setAddedProducts((prev) => {
-      const found = prev.find((p) => p.name === product.name);
+
+function cartReducer(addedProducts, action) {
+  switch (action.type) {
+    case "ADD_ITEM": {
+      const found = addedProducts.find((p) => p.name === action.payload.name);
       if (found) {
-        return prev.map((p) =>
-          p.name === product.name ? { ...p, quantity: p.quantity + 1 } : p
+        return addedProducts.map((p) =>
+          p.name === action.payload.name
+            ? { ...p, quantity: p.quantity + 1 }
+            : p
         );
       } else {
-        return [...prev, { ...product, quantity: 1 }];
+        return [...addedProducts, { ...action.payload, quantity: 1 }];
       }
-    });
+    }
+    case "UPDATE_QUANTITY":
+      if (action.payload.quantity < 1 || isNaN(action.payload.quantity)) {
+        return addedProducts;
+      }
+      return addedProducts.map((p) =>
+        p.name === action.payload.name
+          ? { ...p, quantity: action.payload.quantity }
+          : p
+      );
+    case "REMOVE_ITEM":
+      return addedProducts.filter((p) => p.name !== action.payload);
+    default:
+      return addedProducts;
   }
+}
 
-  const removeForomCart = (product) => {
-    setAddedProducts((curr) => curr.filter((p) => p.name !== product.name));
-  };
+function App() {
+  const [addedProducts, dispatchCart] = useReducer(cartReducer, []);
 
   const totalToPay = addedProducts.reduce(
     (acc, p) => acc + p.price * p.quantity,
@@ -40,7 +55,9 @@ function App() {
               key={i}
               name={product.name}
               price={product.price}
-              addToCart={() => addToCart(product)}
+              addToCart={() =>
+                dispatchCart({ type: "ADD_ITEM", payload: product })
+              }
             />
           ))}
         </ul>
@@ -52,8 +69,33 @@ function App() {
             <li key={i}>
               <p>{product.name}</p>
               <p>prezzo: {product.price}</p>
-              <strong>Quantità: {product.quantity}</strong>
-              <button onClick={() => removeForomCart(product)}>
+              <label>
+                <strong>Quantità: </strong>
+                <input
+                  type="number"
+                  min="1"
+                  value={product.quantity}
+                  onChange={(e) =>
+                    dispatchCart({
+                      type: "UPDATE_QUANTITY",
+                      payload: {
+                        name: product.name,
+                        quantity: parseInt(e.target.value),
+                      },
+                    })
+                  }
+                  style={{
+                    width: "40px",
+                    marginLeft: "5px",
+                    marginRight: "5px",
+                  }}
+                />
+              </label>
+              <button
+                onClick={() =>
+                  dispatchCart({ type: "REMOVE_ITEM", payload: product.name })
+                }
+              >
                 Rimuovi dal carrello
               </button>
             </li>
