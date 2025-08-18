@@ -9,16 +9,17 @@ const products = [
 function App() {
   const [addedProducts, setAddedProducts] = useState([]);
   function addToCart(product) {
-    const isAddedProduct = addedProducts.some((p) => p.name === product.name);
-    if (isAddedProduct) {
-      return addedProducts.map((p) =>
-        p.name === product.name ? { ...p, quantity: p.quantity + 1 } : p
-      );
-    } else {
-      setAddedProducts([...addedProducts, { ...product, quantity: 1 }]);
-    }
+    setAddedProducts((prev) => {
+      const found = prev.find((p) => p.name === product.name);
+      if (found) {
+        return prev.map((p) =>
+          p.name === product.name ? { ...p, quantity: p.quantity + 1 } : p
+        );
+      } else {
+        return [...prev, { ...product, quantity: 1 }];
+      }
+    });
   }
-
   return (
     <>
       <h1>Ex Reducer</h1>
