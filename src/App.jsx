@@ -9,17 +9,16 @@ const products = [
 function App() {
   const [addedProducts, setAddedProducts] = useState([]);
   function addToCart(product) {
-    setAddedProducts((prev) => {
-      const found = prev.find((p) => p.name === product.name);
-      if (found) {
-        return prev.map((p) =>
-          p.name === product.name ? { ...p, quantity: p.quantity + 1 } : p
-        );
-      } else {
-        return [...prev, { ...product, quantity: 1 }];
-      }
-    });
+    const isAddedProduct = addedProducts.some((p) => p.name === product.name);
+    if (isAddedProduct) {
+      return addedProducts.map((p) =>
+        p.name === product.name ? { ...p, quantity: p.quantity + 1 } : p
+      );
+    } else {
+      setAddedProducts([...addedProducts, { ...product, quantity: 1 }]);
+    }
   }
+
   return (
     <>
       <h1>Ex Reducer</h1>
@@ -39,8 +38,8 @@ function App() {
       <div className="cart">
         <h2>Cart</h2>
         <ul>
-          {addedProducts.map((product, idx) => (
-            <li key={idx}>
+          {addedProducts.map((product, i) => (
+            <li key={i}>
               <p>{product.name}</p>
               <p>prezzo: {product.price}</p>
               <strong>Quantità: {product.quantity}</strong>
